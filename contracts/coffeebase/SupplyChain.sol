@@ -153,11 +153,11 @@ contract SupplyChain {
   }
 
   // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
-  function harvestItem(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes) public 
+  function harvestItem(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes, address _retailerID, address _distributorID) public 
   {
     
     // Add the new item as part of Harvest
-    items[sku] = Item({sku: sku, upc: _upc, ownerID: _originFarmerID, originFarmerID: _originFarmerID, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Harvested, distributorID: msg.sender, retailerID: msg.sender, consumerID: msg.sender });
+    items[sku] = Item({sku: sku, upc: _upc, ownerID: _originFarmerID, originFarmerID: _originFarmerID, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Harvested, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event
@@ -316,7 +316,16 @@ contract SupplyChain {
   ) 
   {
     // Assign values to the 9 parameters
+  itemSKU = items[_upc].sku;
+  itemUPC = items[_upc].upc;
   
+  productID = items[_upc].productID;
+  productNotes = items[_upc].productNotes;
+  productPrice = items[_upc].productPrice;
+  itemState = uint(items[_upc].itemState);
+  distributorID = items[_upc].distributorID;
+  retailerID = items[_upc].retailerID;
+  consumerID = items[_upc].consumerID;
     
   return 
   (
@@ -326,8 +335,8 @@ contract SupplyChain {
   productNotes,
   productPrice,
   itemState,
-  distributorID,
   retailerID,
+  distributorID,
   consumerID
   );
   }
