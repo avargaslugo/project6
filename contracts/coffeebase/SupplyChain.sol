@@ -1,6 +1,7 @@
 pragma solidity ^0.4.24;
+import {ProducerRole} from "../coffeeaccesscontrol/ProducerRole.sol";
 // Define a contract 'Supplychain'
-contract SupplyChain {
+contract SupplyChain is ProducerRole{
 
   // Define 'owner'
   address owner;
@@ -21,17 +22,18 @@ contract SupplyChain {
   // Define enum 'State' with the following values:
   enum State 
   { 
-    Harvested,  // 0
+    Produced,  // 0
+    Shipped,    // 1
+    Received,   // 2
     Processed,  // 1
     Packed,     // 2
     ForSale,    // 3
     Sold,       // 4
-    Shipped,    // 5
-    Received,   // 6
+    
     Purchased   // 7
     }
 
-  State constant defaultState = State.Harvested;
+  State constant defaultState = State.Produced;
 
   // Define a struct 'Item' with the following fields:
   struct Item {
@@ -53,7 +55,7 @@ contract SupplyChain {
   }
 
   // Define 8 events with the same 8 state values and accept 'upc' as input argument
-  event Harvested(uint upc);
+  event Produced(uint upc);
   event Processed(uint upc);
   event Packed(uint upc);
   event ForSale(uint upc);
@@ -88,9 +90,9 @@ contract SupplyChain {
     items[_upc].consumerID.transfer(amountToReturn);
   }
 
-  // Define a modifier that checks if an item.state of a upc is Harvested
-  modifier harvested(uint _upc) {
-    require(items[_upc].itemState == State.Harvested);
+  // Define a modifier that checks if an item.state of a upc is Produced
+  modifier produced(uint _upc) {
+    require(items[_upc].itemState == State.Produced);
     _;
   }
 
@@ -120,13 +122,12 @@ contract SupplyChain {
   
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
-
+    require(items[_upc].itemState == State.Shipped);
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Received
   modifier received(uint _upc) {
-
     _;
   }
 
@@ -152,16 +153,16 @@ contract SupplyChain {
     }
   }
 
-  // Define a function 'harvestItem' that allows a farmer to mark an item 'Harvested'
-  function harvestItem(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes, address _retailerID, address _distributorID) public 
+  // Define a function 'produceDrug' that allows a farmer to mark an item 'Produced'
+  function produceDrug(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes, address _retailerID, address _distributorID) public 
   {
     
     // Add the new item as part of Harvest
-    items[sku] = Item({sku: sku, upc: _upc, ownerID: _originFarmerID, originFarmerID: _originFarmerID, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Harvested, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
+    items[sku] = Item({sku: sku, upc: _upc, ownerID: _originFarmerID, originFarmerID: _originFarmerID, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Produced, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event
-    emit Harvested(_upc);
+    emit Produced(_upc);
     
     
   }
@@ -173,8 +174,9 @@ contract SupplyChain {
   // Call modifier to verify caller of this function
   
   {
+    //items[sku].itemState = State.Shipped
     // Update the appropriate fields
-    
+    //emit Shipped
     // Emit the appropriate event
     
   }
@@ -200,6 +202,7 @@ contract SupplyChain {
   
   {
     // Update the appropriate fields
+
     
     // Emit the appropriate event
     
@@ -227,27 +230,29 @@ contract SupplyChain {
 
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
   // Use the above modifers to check if the item is sold
-  function shipItem(uint _upc) public 
+  function shipItem(uint _upc) public produced(_upc)
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Call modifier to verify caller of this function
     
     {
+    items[_upc].itemState = State.Shipped;
     // Update the appropriate fields
-    
+    emit Shipped(_upc);
     // Emit the appropriate event
     
   }
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
-  function receiveItem(uint _upc) public 
+  function receiveItem(uint _upc) public
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp
     {
-    // Update the appropriate fields - ownerID, retailerID, itemState
-    
+    //items[_upc].itemState = State.Received;
+    // Update the appropriate fields
+    //emit Received(upc);
     // Emit the appropriate event
     
   }
