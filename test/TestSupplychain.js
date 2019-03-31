@@ -76,33 +76,42 @@ contract('SupplyChain', function(accounts) {
         const supplyChain = await SupplyChain.deployed()
 
         // Mark an item as Harvested by calling function produceDrug()
-        let tx = await supplyChain.produceDrug(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes, retailerID, distributorID)
         let tx2 = await supplyChain.shipItem(upc)
 
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
         
-        truffleAssert.eventEmitted(tx, 'Produced');
         truffleAssert.eventEmitted(tx2, 'Shipped');
         assert.equal(resultBufferTwo[5], 1, 'Error: Invalid item State')
               
-    }),
+    })
 
-    //3rd test
-    it("Testing to do any stuff", async() => {
+    // 2nd Test
+    it("Testing smart contract function receiveItem() that allows a retailer to recive a drug", async() => {
 
         const supplyChain = await SupplyChain.deployed()
-
         // Mark an item as Harvested by calling function produceDrug()
-        let tx = await supplyChain.produceDrug(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes, retailerID, distributorID)
-        let tx2 = await supplyChain.shipItem(upc)
-
+        let txreceived = await supplyChain.receiveItem(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
-        
-        truffleAssert.eventEmitted(tx, 'Produced');
-        truffleAssert.eventEmitted(tx2, 'Shipped');
-        assert.equal(resultBufferTwo[5], 1, 'Error: Invalid item State')
+        truffleAssert.eventEmitted(txreceived, 'Received');
+        assert.equal(resultBufferTwo[5], 2, 'Error: Invalid item State')
               
-    })    
+    })
+
+    // 2nd Test
+    it("Testing smart contract function receiveItem() that allows a retailer to recive a drug", async() => {
+
+        const supplyChain = await SupplyChain.deployed()
+        // Mark an item as Harvested by calling function produceDrug()
+        let txowned = await supplyChain.buyItem(upc)
+        const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
+        truffleAssert.eventEmitted(txowned, 'Owned');
+        assert.equal(resultBufferTwo[5], 3, 'Error: Invalid item State')
+              
+    })
+
+
+
+      
   
 
 });
