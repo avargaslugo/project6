@@ -42,13 +42,49 @@ contract('SupplyChain', function(accounts) {
     console.log("Retailer: accounts[3] ", accounts[3])
     console.log("Consumer: accounts[4] ", accounts[4])
 
+    it("Test for adding producers", async() => {
+        const supplyChain = await SupplyChain.deployed()
+
+        let addproducertx = await supplyChain.addProducer(originFarmerID)
+        const isProducerTrue = await supplyChain.isProducer(originFarmerID)
+        const isProducerFalse = await supplyChain.isProducer(retailerID)
+        
+        truffleAssert.eventEmitted(addproducertx, 'ProducerAdded');
+        assert.equal(isProducerTrue, true)
+        assert.equal(isProducerFalse, false)
+    })
+
+    it("Test for adding distributors", async() => {
+        const supplyChain = await SupplyChain.deployed()
+
+        let adddistributortx = await supplyChain.addDistributor(distributorID)
+        const isDistributorTrue = await supplyChain.isDistributor(distributorID)
+        const isDistributorFalse = await supplyChain.isDistributor(originFarmerID)
+        
+        truffleAssert.eventEmitted(adddistributortx, 'DistributorAdded');
+        assert.equal(isDistributorTrue, true)
+        assert.equal(isDistributorFalse, false)
+    })
+
+    it("Test for adding retailers", async() => {
+        const supplyChain = await SupplyChain.deployed()
+
+        let addretailertx = await supplyChain.addRetailer(retailerID)
+        const isRetailerTrue = await supplyChain.isRetailer(retailerID)
+        const isRetailerFalse = await supplyChain.isRetailer(originFarmerID)
+        
+        truffleAssert.eventEmitted(addretailertx, 'RetailerAdded');
+        assert.equal(isRetailerTrue, true)
+        assert.equal(isRetailerFalse, false)
+    })
+
     // 1st Test
     it("Testing smart contract function produceDrug() that allows a farmer to harvest coffee", async() => {
         const supplyChain = await SupplyChain.deployed()
 
         // Mark an item as Harvested by calling function produceDrug()
-        let tx = await supplyChain.produceDrug(upc, originFarmerID, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, productNotes, retailerID, distributorID)
-
+        let producedtx = await supplyChain.produceDrug(upc, originFarmName, originFarmInformation, originFarmLatitude, originFarmLongitude, 
+            productNotes, retailerID, distributorID, {from: originFarmerID})
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
@@ -66,9 +102,8 @@ contract('SupplyChain', function(accounts) {
         assert.equal(resultBufferTwo[6], retailerID, 'Error: Invalid retailer')
         assert.equal(resultBufferTwo[7], distributorID, 'Error: Invalid distributor')
         assert.equal(resultBufferTwo[8], 0, 'Error: Invalid consumer')
-        //assert.equal(eventEmitted, true, 'Invalid event emitted')        
-        truffleAssert.eventEmitted(tx, 'Produced');
-    }),    
+        truffleAssert.eventEmitted(producedtx, 'Produced');
+    })
 
     // 2nd Test
     it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {

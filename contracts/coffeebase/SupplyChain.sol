@@ -1,8 +1,10 @@
 pragma solidity ^0.4.24;
 import {ProducerRole} from "../coffeeaccesscontrol/ProducerRole.sol";
-// Define a contract 'Supplychain'
-contract SupplyChain is ProducerRole{
+import {DistributorRole} from "../coffeeaccesscontrol/DistributorRole.sol";
+import {RetailerRole} from "../coffeeaccesscontrol/RetailerRole.sol";
 
+// Define a contract 'Supplychain'
+contract SupplyChain is ProducerRole, DistributorRole, RetailerRole{
   // Define 'owner'
   address owner;
 
@@ -86,30 +88,6 @@ contract SupplyChain is ProducerRole{
     require(items[_upc].itemState == State.Produced);
     _;
   }
-
-  // Define a modifier that checks if an item.state of a upc is Processed
-  modifier processed(uint _upc) {
-
-    _;
-  }
-  
-  // Define a modifier that checks if an item.state of a upc is Packed
-  modifier packed(uint _upc) {
-
-    _;
-  }
-
-  // Define a modifier that checks if an item.state of a upc is ForSale
-  modifier forSale(uint _upc) {
-
-    _;
-  }
-
-  // Define a modifier that checks if an item.state of a upc is Sold
-  modifier sold(uint _upc) {
-
-    _;
-  }
   
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
@@ -119,6 +97,7 @@ contract SupplyChain is ProducerRole{
 
   // Define a modifier that checks if an item.state of a upc is Received
   modifier received(uint _upc) {
+    require(items[_upc].itemState == State.Received);
     _;
   }
 
@@ -145,11 +124,11 @@ contract SupplyChain is ProducerRole{
   }
 
   // Define a function 'produceDrug' that allows a farmer to mark an item 'Produced'
-  function produceDrug(uint _upc, address _originFarmerID, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes, address _retailerID, address _distributorID) public 
+  function produceDrug(uint _upc, string _originFarmName, string _originFarmInformation, string  _originFarmLatitude, string  _originFarmLongitude, string  _productNotes, address _retailerID, address _distributorID) public onlyProducer()
   {
     
     // Add the new item as part of Harvest
-    items[sku] = Item({sku: sku, upc: _upc, ownerID: _originFarmerID, originFarmerID: _originFarmerID, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Produced, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
+    items[sku] = Item({sku: sku, upc: _upc, ownerID: msg.sender, originFarmerID: msg.sender, originFarmName: _originFarmName, originFarmInformation: _originFarmInformation, originFarmLatitude: _originFarmLatitude, originFarmLongitude: _originFarmLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: 0, itemState: State.Produced, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event
@@ -158,51 +137,9 @@ contract SupplyChain is ProducerRole{
     
   }
 
-  // Define a function 'processtItem' that allows a farmer to mark an item 'Processed'
-  function processItem(uint _upc) public 
-  // Call modifier to check if upc has passed previous supply chain stage
-  
-  // Call modifier to verify caller of this function
-  
-  {
-    //items[sku].itemState = State.Shipped
-    // Update the appropriate fields
-    //emit Shipped
-    // Emit the appropriate event
-    
-  }
-
-  // Define a function 'packItem' that allows a farmer to mark an item 'Packed'
-  function packItem(uint _upc) public 
-  // Call modifier to check if upc has passed previous supply chain stage
-  
-  // Call modifier to verify caller of this function
-  
-  {
-    // Update the appropriate fields
-    
-    // Emit the appropriate event
-    
-  }
-
-  // Define a function 'sellItem' that allows a farmer to mark an item 'ForSale'
-  function sellItem(uint _upc, uint _price) public 
-  // Call modifier to check if upc has passed previous supply chain stage
-  
-  // Call modifier to verify caller of this function
-  
-  {
-    // Update the appropriate fields
-
-    
-    // Emit the appropriate event
-    
-  }
-
-
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
   // Use the above modifers to check if the item is sold
-  function shipItem(uint _upc) public produced(_upc)
+  function shipItem(uint _upc) public produced(_upc) onlyDistributor()
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Call modifier to verify caller of this function
