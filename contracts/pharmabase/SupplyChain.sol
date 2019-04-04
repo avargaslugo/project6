@@ -27,9 +27,10 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
   enum State 
   { 
     Produced,  // 0
-    Shipped,    // 1
-    Received,   // 2
-    Owned  // 3
+    PaidFor, // 1
+    Shipped,    // 2
+    Received,   // 3
+    Owned  // 4
     }
 
   State constant defaultState = State.Produced;
@@ -55,6 +56,7 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define 8 events with the same 8 state values and accept 'upc' as input argument
   event Produced(uint upc);
+  event PaidFor(uint upc);
   event Shipped(uint upc);
   event Received(uint upc);
   event Owned(uint upc);
@@ -72,8 +74,8 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
   }
 
   // Define a modifier that checks if the paid amount is sufficient to cover the price
-  modifier paidEnough(uint _price) { 
-    require(msg.value >= _price); 
+  modifier canPayDrug(uint _upc) { 
+    require(msg.value >= items[_upc].productPrice); 
     _;
   }
   
@@ -88,6 +90,11 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
   // Define a modifier that checks if an item.state of a upc is Produced
   modifier produced(uint _upc) {
     require(items[_upc].itemState == State.Produced);
+    _;
+  }
+
+  modifier paidFor(uint _upc) {
+    require(items[_upc].itemState == State.PaidFor);
     _;
   }
   
@@ -137,14 +144,27 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     emit Produced(_upc);
   }
 
+  function payForDrug(uint _upc) public produced(_upc) onlyRetailer() canPayDrug(_upc) payable{
+
+    address producer = items[_upc].producerID;
+    uint drugPrice = items[_upc].productPrice;
+
+    producer.transfer(drugPrice);
+    items[_upc].itemState = State.PaidFor;
+    emit PaidFor(_upc);
+  }
+
   // Define a function 'shipItem' that allows the distributor to mark an item 'Shipped'
   // Use the above modifers to check if the item is sold
-  function shipItem(uint _upc) public produced(_upc) onlyDistributor()
+  function shipItem(uint _upc) public onlyDistributor() paidFor(_upc)
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Call modifier to verify caller of this function
     
     {
+    address targetDistributor = items[_upc].distributorID;
+    require(targetDistributor == msg.sender);
+
     items[_upc].ownerID = items[_upc].distributorID;
     items[_upc].itemState = State.Shipped;
     // Update the appropriate fields
@@ -155,13 +175,17 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
-  function receiveItem(uint _upc) public shipped(_upc)
+  function receiveItem(uint _upc) public shipped(_upc) onlyRetailer()
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp
     {
+    address targetRetailer = items[_upc].retailerID;
+    require(targetRetailer == msg.sender);
+
     items[_upc].ownerID = items[_upc].retailerID;
     items[_upc].itemState = State.Received;
+    items[_upc].productPrice = (items[_upc].productPrice * 6) / 5;
     // Update the appropriate fields
     emit Received(upc);
     // Emit the appropriate event
@@ -170,13 +194,16 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
-  function buyItem(uint _upc) public received(_upc)
+  function buyItem(uint _upc) public received(_upc) onlyConsumer() payable
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp
     {
+    address seller = items[_upc].retailerID;
+    uint price = items[_upc].productPrice;
     // Update the appropriate fields - ownerID, consumerID, itemState
-    items[_upc].ownerID = items[_upc].consumerID;
+    seller.transfer(price);
+    items[_upc].ownerID = msg.sender;
     items[_upc].itemState = State.Owned;
     
     // Emit the appropriate event
