@@ -194,7 +194,7 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
-  function buyItem(uint _upc) public received(_upc) onlyConsumer() payable
+  function buyDrug(uint _upc) public received(_upc) onlyConsumer() payable
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp

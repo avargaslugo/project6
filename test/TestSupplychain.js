@@ -42,6 +42,8 @@ contract('SupplyChain', function(accounts) {
     console.log("Retailer: accounts[3] ", accounts[3])
     console.log("Consumer: accounts[4] ", accounts[4])
 
+    // First 4 tests are intended to test the creation of different roles.
+
     it("Test for adding producers", async() => {
         const supplyChain = await SupplyChain.deployed()
 
@@ -90,11 +92,11 @@ contract('SupplyChain', function(accounts) {
         assert.equal(isConsumerFalse, false)
     })
 
-    // 1st Test
-    it("Testing smart contract function produceDrug() that allows a farmer to harvest coffee", async() => {
+    // We now test the functionality of the contract
+    it("Testing smart contract function produceDrug() that allows a producer to produce a drug", async() => {
         const supplyChain = await SupplyChain.deployed()
 
-        // Mark an item as Harvested by calling function produceDrug()
+        // Mark an item as Produced by calling function produceDrug()
         let producedtx = await supplyChain.produceDrug(upc, ProducerName, producerPlantInformation, plantLatitude, plantLongitude, 
             productNotes, retailerAddress, distributorAddress, productPrice, {from: ProducreAddress})
         // Retrieve the just now saved item from blockchain by calling function fetchItem()
@@ -105,11 +107,11 @@ contract('SupplyChain', function(accounts) {
         assert.equal(resultBufferOne[0], sku, 'Error: Invalid item SKU')
         assert.equal(resultBufferOne[1], upc, 'Error: Invalid item UPC')
         assert.equal(resultBufferOne[2], ProducreAddress, 'Error: Missing or Invalid ownerID')
-        assert.equal(resultBufferOne[3], ProducreAddress, 'Error: Missing or Invalid originFarmerID')
-        assert.equal(resultBufferOne[4], ProducerName, 'Error: Missing or Invalid originFarmName')
-        assert.equal(resultBufferOne[5], producerPlantInformation, 'Error: Missing or Invalid originFarmInformation')
-        assert.equal(resultBufferOne[6], plantLatitude, 'Error: Missing or Invalid originFarmLatitude')
-        assert.equal(resultBufferOne[7], plantLongitude, 'Error: Missing or Invalid originFarmLongitude')
+        assert.equal(resultBufferOne[3], ProducreAddress, 'Error: Missing or Invalid producerID')
+        assert.equal(resultBufferOne[4], ProducerName, 'Error: Missing or Invalid producerName')
+        assert.equal(resultBufferOne[5], producerPlantInformation, 'Error: Missing or Invalid producerPlantInformation')
+        assert.equal(resultBufferOne[6], plantLatitude, 'Error: Missing or Invalid producerPlandtLatitude')
+        assert.equal(resultBufferOne[7], plantLongitude, 'Error: Missing or Invalid producerPlantLongitude')
         assert.equal(resultBufferTwo[5], 0, 'Error: Invalid item State')
         assert.equal(resultBufferTwo[6], retailerAddress, 'Error: Invalid retailer')
         assert.equal(resultBufferTwo[7], distributorAddress, 'Error: Invalid distributor')
@@ -119,35 +121,31 @@ contract('SupplyChain', function(accounts) {
 
     })
 
-
-    // 2nd Test
-    it("Testing smart contract function payFor() that allows a distributor to ship coffee", async() => {
+    it("Testing smart contract function payFor() that a retailer purchase a drug and start the shipping process", async() => {
         
         const supplyChain = await SupplyChain.deployed()
         let initialProducerBalance = await web3.eth.getBalance(ProducreAddress);
-        // Mark an item as Harvested by calling function produceDrug()
+        // retailer pays for the drug and marks it as paid for
         let tx2 = await supplyChain.payForDrug(upc, {from: retailerAddress, value: productPrice})
 
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-        
-        
         truffleAssert.eventEmitted(tx2, 'PaidFor');
         assert.equal(resultBufferTwo[5], 1, 'Error: Invalid item State')
-        assert.equal(resultBufferOne[2], ProducreAddress, 'Error: incorrect ownership transfer')
+        assert.equal(resultBufferOne[2], ProducreAddress, 'Error: the producer should still be the owner at this stage')
 
         let actualBalance = await web3.eth.getBalance(ProducreAddress);
-        assert.equal(actualBalance.toString(), initialProducerBalance+productPrice)
+        // make sure that the balances are correctly updated
+        assert.equal(actualBalance, parseInt(initialProducerBalance) + parseInt(productPrice))
               
     })
 
-    // 2nd Test
-    it("Testing smart contract function shipItem() that allows a distributor to ship coffee", async() => {
+    it("Testing smart contract function shipItem() that allows a distributor to ship a drug", async() => {
 
         const supplyChain = await SupplyChain.deployed()
 
-        // Mark an item as Harvested by calling function produceDrug()
+        // Mark an item as Shipped by calling function produceDrug()
         let tx2 = await supplyChain.shipItem(upc,{from: distributorAddress})
 
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
@@ -155,15 +153,15 @@ contract('SupplyChain', function(accounts) {
         
         truffleAssert.eventEmitted(tx2, 'Shipped');
         assert.equal(resultBufferTwo[5], 2, 'Error: Invalid item State')
+        // makes sure that the distributor is the new owner and responsible for  the drug.
         assert.equal(resultBufferOne[2], distributorAddress, 'Error: incorrect ownership transfer')
               
     })
 
-    // 2nd Test
     it("Testing smart contract function receiveItem() that allows a retailer to recive a drug", async() => {
 
         const supplyChain = await SupplyChain.deployed()
-        // Mark an item as Harvested by calling function produceDrug()
+        // Mark an item as Received by calling function receiveItem() function
         let txreceived = await supplyChain.receiveItem(upc, {from: retailerAddress})
 
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
@@ -171,23 +169,26 @@ contract('SupplyChain', function(accounts) {
         
         truffleAssert.eventEmitted(txreceived, 'Received');
         assert.equal(resultBufferTwo[5], 3, 'Error: Invalid item State')
+        // makes sure that the retialer is now the new owner and reponsible for the drug
         assert.equal(resultBufferOne[2], retailerAddress, 'Error: incorrect ownership transfer')
+        // makes sure the price of the drug is updated correctly
+        assert.equal(resultBufferTwo[4], productPrice*6/5, 'Error: change price was not changed')
               
     })
 
-    // 2nd Test
     it("Testing smart contract function buyItem() that allows a consume to buy a drug", async() => {
 
         const supplyChain = await SupplyChain.deployed()
-        // Mark an item as Harvested by calling function produceDrug()
-        let txowned = await supplyChain.buyItem(upc, {from: consumerID, value: productPrice*2})
+        // Mark an item as Owen by calling function buyDrug()
+        let txowned = await supplyChain.buyDrug(upc, {from: consumerID, value: productPrice*2})
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
         truffleAssert.eventEmitted(txowned, 'Owned');
         assert.equal(resultBufferTwo[5], 4, 'Error: Invalid item State')
+        // makes sure the consumer is not defined as the owner. This defines the end of the supply chain
         assert.equal(resultBufferOne[2], consumerID, 'Error: incorrect ownership transfer')
-        assert.equal(resultBufferTwo[4], productPrice*6/5, 'Error: change in price')
+        
               
     })
   
