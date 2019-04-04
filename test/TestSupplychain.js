@@ -122,16 +122,16 @@ contract('SupplyChain', function(accounts) {
 
     // 2nd Test
     it("Testing smart contract function payFor() that allows a distributor to ship coffee", async() => {
-
+        
         const supplyChain = await SupplyChain.deployed()
-
+        let initialProducerBalance = await web3.eth.getBalance(ProducreAddress);
         // Mark an item as Harvested by calling function produceDrug()
-        let tx2 = await supplyChain.payForDrug(upc, {from: retailerAddress, value: productPrice, gas:0})
+        let tx2 = await supplyChain.payForDrug(upc, {from: retailerAddress, value: productPrice})
 
         const resultBufferOne = await supplyChain.fetchItemBufferOne.call(upc)
         const resultBufferTwo = await supplyChain.fetchItemBufferTwo.call(upc)
 
-        let initialProducerBalance = await web3.eth.getBalance(ProducreAddress);
+        
         
         truffleAssert.eventEmitted(tx2, 'PaidFor');
         assert.equal(resultBufferTwo[5], 1, 'Error: Invalid item State')
