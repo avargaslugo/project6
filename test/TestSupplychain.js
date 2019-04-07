@@ -118,11 +118,9 @@ contract('SupplyChain', function(accounts) {
         assert.equal(resultBufferTwo[8], 0, 'Error: Invalid consumer')
         assert.equal(resultBufferTwo[4], productPrice, 'Error: Invalid productPrice')
         truffleAssert.eventEmitted(producedtx, 'Produced');
-
     })
 
     it("Testing smart contract function payFor() that a retailer purchase a drug and start the shipping process", async() => {
-        
         const supplyChain = await SupplyChain.deployed()
         let initialProducerBalance = await web3.eth.getBalance(ProducreAddress);
         // retailer pays for the drug and marks it as paid for
@@ -138,11 +136,9 @@ contract('SupplyChain', function(accounts) {
         let actualBalance = await web3.eth.getBalance(ProducreAddress);
         // make sure that the balances are correctly updated
         assert.equal(actualBalance, parseInt(initialProducerBalance) + parseInt(productPrice))
-              
     })
 
     it("Testing smart contract function shipItem() that allows a distributor to ship a drug", async() => {
-
         const supplyChain = await SupplyChain.deployed()
 
         // Mark an item as Shipped by calling function produceDrug()
@@ -155,11 +151,9 @@ contract('SupplyChain', function(accounts) {
         assert.equal(resultBufferTwo[5], 2, 'Error: Invalid item State')
         // makes sure that the distributor is the new owner and responsible for  the drug.
         assert.equal(resultBufferOne[2], distributorAddress, 'Error: incorrect ownership transfer')
-              
     })
 
     it("Testing smart contract function receiveItem() that allows a retailer to recive a drug", async() => {
-
         const supplyChain = await SupplyChain.deployed()
         // Mark an item as Received by calling function receiveItem() function
         let txreceived = await supplyChain.receiveItem(upc, {from: retailerAddress})
@@ -173,7 +167,6 @@ contract('SupplyChain', function(accounts) {
         assert.equal(resultBufferOne[2], retailerAddress, 'Error: incorrect ownership transfer')
         // makes sure the price of the drug is updated correctly
         assert.equal(resultBufferTwo[4], productPrice*6/5, 'Error: change price was not changed')
-              
     })
 
     it("Testing smart contract function buyItem() that allows a consume to buy a drug", async() => {
@@ -187,11 +180,7 @@ contract('SupplyChain', function(accounts) {
         truffleAssert.eventEmitted(txowned, 'Owned');
         assert.equal(resultBufferTwo[5], 4, 'Error: Invalid item State')
         // makes sure the consumer is not defined as the owner. This defines the end of the supply chain
-        assert.equal(resultBufferOne[2], consumerID, 'Error: incorrect ownership transfer')
-        
-              
+        assert.equal(resultBufferOne[2], consumerID, 'Error: incorrect ownership transfer')        
     })
-  
-
 });
 

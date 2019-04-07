@@ -71,14 +71,16 @@ App = {
         // Legacy dapp browsers...
         else if (window.web3) {
             App.web3Provider = window.web3.currentProvider;
+            console.log("using port 9545dsfsdf")
         }
         // If no injected web3 instance is detected, fall back to Ganache
         else {
-            App.web3Provider = new Web3.providers.HttpProvider('http://localhost:7545');
+            App.web3Provider = new Web3.providers.HttpProvider('http://localhost:9545');
+            console.log("using port 9545")
         }
 
         App.getMetaskAccountID();
-
+        console.log("Starting Supply Chain")
         return App.initSupplyChain();
     },
 
@@ -108,8 +110,8 @@ App = {
             App.contracts.SupplyChain = TruffleContract(SupplyChainArtifact);
             App.contracts.SupplyChain.setProvider(App.web3Provider);
             
-            App.fetchItemBufferOne();
-            App.fetchItemBufferTwo();
+            //App.fetchItemBufferOne();
+            //App.fetchItemBufferTwo();
             App.fetchEvents();
 
         });
@@ -156,6 +158,7 @@ App = {
                 break;
             case 9:
                 return await App.fetchItemBufferOne(event);
+                console.log("click!")
                 break;
             case 10:
                 return await App.fetchItemBufferTwo(event);
@@ -168,14 +171,19 @@ App = {
         var processId = parseInt($(event.target).data('id'));
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.harvestItem(
-                App.upc, 
-                App.metamaskAccountID, 
+            console.log("upc: " + $("#upc").val())
+            return instance.produceDrug(
+                $("#upc").val(), //App.upc, 
+                //App.metamaskAccountID, 
                 App.originFarmName, 
                 App.originFarmInformation, 
                 App.originFarmLatitude, 
                 App.originFarmLongitude, 
-                App.productNotes
+                App.productNotes,
+                0, //retailer ID
+                0, //distributor ID
+                1000 //price
+
             );
         }).then(function(result) {
             $("#ftc-item").text(result);
