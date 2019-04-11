@@ -133,7 +133,7 @@ App = {
 
         switch(processId) {
             case 1:
-                return await App.harvestItem(event);
+                return await App.prduceDrug(event);
                 break;
             case 2:
                 return await App.processItem(event);
@@ -158,7 +158,6 @@ App = {
                 break;
             case 9:
                 return await App.fetchItemBufferOne(event);
-                console.log("click!")
                 break;
             case 10:
                 return await App.fetchItemBufferTwo(event);
@@ -166,24 +165,22 @@ App = {
             }
     },
 
-    harvestItem: function(event) {
+    prduceDrug: function(event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            console.log("upc: " + $("#upc").val())
+            
             return instance.produceDrug(
-                $("#upc").val(), //App.upc, 
-                //App.metamaskAccountID, 
-                App.originFarmName, 
-                App.originFarmInformation, 
-                App.originFarmLatitude, 
-                App.originFarmLongitude, 
-                App.productNotes,
+                2134,//$("#newUPC").val(), //App.upc, 
+                "aaaa", //$("#newDrugProducerName").val(), //App.originFarmName, 
+                'sdfdsf', //$("#newDrugProducerInformation").val(), //App.originFarmInformation, 
+                '1.2', //$("#newDrugProducerLatitude").val(), //App.originFarmLatitude, 
+                '23.4', //$("#newDrugProducerLongitude").val(), //App.originFarmLongitude, 
+                'weird', //$("#newDrugNotes").val(), //App.productNotes,
                 0, //retailer ID
                 0, //distributor ID
-                1000 //price
-
+                10 //price
             );
         }).then(function(result) {
             $("#ftc-item").text(result);

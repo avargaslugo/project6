@@ -29,31 +29,50 @@
             Current Owner ID
             <br>
             <input type="text" id="ownerID" name="ownerID" value="" size="50"><br>
+            Distributor ID
+            <br>
+            <input type="text" id="distributorID" name="distributorID" value="" size="50"><br>
+
             <div class=button-div>
                 <button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Data 1</button>
                 <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Data 2</button>
             </div>
         </div>
         <div class=form-break></div>
-        <h2>Farm Details</h2>
+        <h2>Produce New Drug</h2>
         <div class="form-group">
-            Farmer ID
+            UPC
             <br>
-            <input type="text" id="originFarmerID" name="originFarmerID" value="0x99c289eb2aacec289631a5ddf62cf27a63d4494f"
+            <input type="number" id="newUPC" name="newUPC" value=none size="50"><br>
+            Producer ID
+            <br>
+            <input type="text" id="newDrugProducerID" name="newDrugProducerID" value="0x99c289eb2aacec289631a5ddf62cf27a63d4494f"
                 size="50"><br>
-            Farm Name
+            Producer Name
             <br>
-            <input type="text" id="originFarmName" name="originFarmName" value="John Doe"><br>
-            Farm Information
+            <input type="text" id="newDrugProducerName" name="newDrugProducerName" value="Big Pharma"><br>
+            Producer Information
             <br>
-            <input type="text" id="originFarmInformation" name="originFarmInformation" value="Yarra Valley"><br>
-            Farm Latitude
+            <input type="text" id="newDrugProducerInformation" name="newDrugProducerInformation" value="pharma company with focus in pain killers"><br>
+            Drug Notes
             <br>
-            <input type="text" id="originFarmLatitude" name="originFarmLatitude" value="-38.239770"><br>
-            Farm Longitude
+            <input type="text" id="newDrugNotes" name="newDrugNotes" value="don't give to children"><br>
+            Producer Plant Latitude
             <br>
-            <input type="text" id="originFarmLongitude" name="originFarmLongitude" value="144.341490"><br>
+            <input type="text" id="newDrugProducerPlantLatitude" name="newDrugProducerPlantLatitude" value="-38.239770"><br>
+            Producer Plant Longitude
             <br>
+            <input type="text" id="newDrugProducerPlantLongitud" name="newDrugProducerPlantLongitud" value="144.341490"><br>
+            Drug Price In Ether
+            <br>
+            <input type="text" id="newDrugPrice" name="newDrugPrice" value="1"><br>
+            Retailer Address
+            <br>
+            <input type="text" id="newDrugRetailerID" name="newDrugRetailerID" value="144.341490"><br>
+            Distributor Address
+            <br>
+            <input type="text" id="newDrugDistributorID" name="newDrugDistributorID" value="144.341490"><br>
+
             <button class="btn-harvest" id="button" type="button" data-id="1">Harvest</button>
             <button class="btn-process" id="button" type="button" data-id="2">Process</button>
             <button class="btn-pack" id="button" type="button" data-id="3">Pack</button>

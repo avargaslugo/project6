@@ -1,8 +1,8 @@
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const infuraKey = "637e1b67b327486a9d2b3e8185bfc0ef";
+const infuraKey = "infurakey";
 //
 // const fs = require('fs');
-const mnemonic = 'parent leopard equip settle gadget used acquire absorb reject unaware force annual';
+const mnemonic = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
 
 
 module.exports = {
