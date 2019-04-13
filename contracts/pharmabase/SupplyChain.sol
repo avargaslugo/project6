@@ -73,6 +73,11 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     _;
   }
 
+  modifier upcAvailable(uint _upc){
+    require(items[_upc].ownerID==0); 
+    _;
+  }
+
   // Define a modifier that checks if the paid amount is sufficient to cover the price
   modifier canPayDrug(uint _upc) { 
     require(msg.value >= items[_upc].productPrice); 
@@ -112,7 +117,6 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a modifier that checks if an item.state of a upc is Purchased
   modifier purchased(uint _upc) {
-    
     _;
   }
 
@@ -133,11 +137,11 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
   }
 
   // Define a function 'produceDrug' that allows a farmer to mark an item 'Produced'
-  function produceDrug(uint _upc, string _producerName, string _producerPlantInformation, string  _producerPlantLatitude, string  _producerPlantLongitude, string  _productNotes, address _retailerID, address _distributorID, uint _productPrice) public onlyProducer()
+  function produceDrug(uint _upc, string _producerName, string _producerPlantInformation, string  _producerPlantLatitude, string  _producerPlantLongitude, string  _productNotes, address _retailerID, address _distributorID, uint _productPrice) public onlyProducer() upcAvailable(_upc)
   {
     
     // Add the new item as part of Harvest
-    items[sku] = Item({sku: sku, upc: _upc, ownerID: msg.sender, producerID: msg.sender, producerName: _producerName, producerPlantInformation: _producerPlantInformation, producerPlantLatitude: _producerPlantLatitude, producerPlantLongitude: _producerPlantLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: _productPrice, itemState: State.Produced, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
+    items[_upc] = Item({sku: sku, upc: _upc, ownerID: msg.sender, producerID: msg.sender, producerName: _producerName, producerPlantInformation: _producerPlantInformation, producerPlantLatitude: _producerPlantLatitude, producerPlantLongitude: _producerPlantLongitude,productID: sku+upc ,productNotes: _productNotes, productPrice: _productPrice, itemState: State.Produced, distributorID: _distributorID, retailerID: _retailerID, consumerID: address(0) });
     // Increment sku
     sku = sku + 1;
     // Emit the appropriate event

@@ -24,8 +24,8 @@ App = {
     },
 
     readForm: function () {
-        App.sku = $("#sku").val();
-        App.upc = $("#upc").val();
+        App.sku = 1, //$("#sku").val();
+        App.upc = 1, //$("#upc").val();
         App.ownerID = $("#ownerID").val();
         App.originFarmerID = $("#originFarmerID").val();
         App.originFarmName = $("#originFarmName").val();
@@ -170,17 +170,17 @@ App = {
         var processId = parseInt($(event.target).data('id'));
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            
+            console.log("New upc for new drug: " + $("#newUPC").val())
             return instance.produceDrug(
-                2134,//$("#newUPC").val(), //App.upc, 
-                "aaaa", //$("#newDrugProducerName").val(), //App.originFarmName, 
-                'sdfdsf', //$("#newDrugProducerInformation").val(), //App.originFarmInformation, 
-                '1.2', //$("#newDrugProducerLatitude").val(), //App.originFarmLatitude, 
-                '23.4', //$("#newDrugProducerLongitude").val(), //App.originFarmLongitude, 
-                'weird', //$("#newDrugNotes").val(), //App.productNotes,
-                0, //retailer ID
-                0, //distributor ID
-                10 //price
+                $("#newUPC").val(), 
+                $("#newDrugProducerName").val(), //App.originFarmName, 
+                $("#newDrugProducerInformation").val(), //App.originFarmInformation, 
+                $("#newDrugProducerPlantLatitude").val(), //App.originFarmLatitude, 
+                $("#newDrugProducerPlantLongitud").val(), //App.originFarmLongitude, 
+                $("#newDrugNotes").val(), //App.productNotes,
+                $("#newDrugRetailerID").val(), //retailer ID
+                $("#newDrugDistributorID").val(), //distributor ID
+                $("#newDrugPrice").val() //price
             );
         }).then(function(result) {
             $("#ftc-item").text(result);
