@@ -127,6 +127,7 @@ App = {
                 return await App.fetchItemBufferOne(event);
                 break;
             case 10:
+                await App.fetchItemBufferOne(event);
                 return await App.fetchItemBufferTwo(event);
                 break;
             }
@@ -241,9 +242,9 @@ App = {
         console.log('upc',App.upc);
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferOne(App.upc);
+          return instance.fetchItemBufferOne($("#upc").val());
         }).then(function(result) {
-            
+            $('#itemOwner').text(result[2])
             $("#ftc-item").text(result);
           console.log('fetchItemBufferOne', result);
         }).catch(function(err) {
@@ -268,10 +269,6 @@ App = {
         }).catch(function(err) {
           console.log(err.message);
         });
-    },
-
-    fetchMostRelevantData: function() {
-        
     },
 
     fetchEvents: function () {
