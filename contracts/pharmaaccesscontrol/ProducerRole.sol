@@ -21,7 +21,7 @@ contract ProducerRole {
 
   // Define a modifier that checks to see if msg.sender has the appropriate role
   modifier onlyProducer() {
-    require(isProducer(msg.sender));
+    require(isProducer(msg.sender), "Function is limited to Producers");
     _;
   }
 

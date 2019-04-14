@@ -2,14 +2,14 @@ const HDWalletProvider = require('truffle-hdwallet-provider');
 const infuraKey = "infurakey";
 //
 // const fs = require('fs');
-const mnemonic = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat';
+const mnemonic = 'better cruise rely forum syrup remember agree travel lottery resist puzzle exit';
 
 
 module.exports = {
   networks: {
     development: {
       host: "127.0.0.1",
-      port: 9545,
+      port: 8545,
       network_id: "*" // Match any network id
     },
 

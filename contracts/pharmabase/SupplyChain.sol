@@ -63,24 +63,24 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a modifer that checks to see if msg.sender == owner of the contract
   modifier onlyOwner() {
-    require(msg.sender == owner);
+    require(msg.sender == owner, "this function is only reserved for the contract owner");
     _;
   }
 
   // Define a modifer that verifies the Caller
   modifier verifyCaller (address _address) {
-    require(msg.sender == _address); 
+    require(msg.sender == _address, "wrong caller"); 
     _;
   }
 
   modifier upcAvailable(uint _upc){
-    require(items[_upc].ownerID==0); 
+    require(items[_upc].ownerID==0, "UPC has already been registered"); 
     _;
   }
 
   // Define a modifier that checks if the paid amount is sufficient to cover the price
   modifier canPayDrug(uint _upc) { 
-    require(msg.value >= items[_upc].productPrice); 
+    require(msg.value >= items[_upc].productPrice, "Not enough funds in the message"); 
     _;
   }
   
@@ -94,29 +94,24 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a modifier that checks if an item.state of a upc is Produced
   modifier produced(uint _upc) {
-    require(items[_upc].itemState == State.Produced);
+    require(items[_upc].itemState == State.Produced, "Drug has not been produced yet");
     _;
   }
 
   modifier paidFor(uint _upc) {
-    require(items[_upc].itemState == State.PaidFor);
+    require(items[_upc].itemState == State.PaidFor, "Drug has not been paid for yet");
     _;
   }
   
   // Define a modifier that checks if an item.state of a upc is Shipped
   modifier shipped(uint _upc) {
-    require(items[_upc].itemState == State.Shipped);
+    require(items[_upc].itemState == State.Shipped, "Item has not been shipped");
     _;
   }
 
   // Define a modifier that checks if an item.state of a upc is Received
   modifier received(uint _upc) {
-    require(items[_upc].itemState == State.Received);
-    _;
-  }
-
-  // Define a modifier that checks if an item.state of a upc is Purchased
-  modifier purchased(uint _upc) {
+    require(items[_upc].itemState == State.Received, "Item has not been received by the retailer");
     _;
   }
 
@@ -167,7 +162,7 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     
     {
     address targetDistributor = items[_upc].distributorID;
-    require(targetDistributor == msg.sender);
+    require(targetDistributor == msg.sender, "Wrong Distributor");
 
     items[_upc].ownerID = items[_upc].distributorID;
     items[_upc].itemState = State.Shipped;
@@ -179,13 +174,13 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a function 'receiveItem' that allows the retailer to mark an item 'Received'
   // Use the above modifiers to check if the item is shipped
-  function receiveItem(uint _upc) public shipped(_upc) onlyRetailer()
+  function receiveItem(uint _upc) public onlyRetailer() shipped(_upc) //onlyRetailer()
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp
     {
     address targetRetailer = items[_upc].retailerID;
-    require(targetRetailer == msg.sender);
+    require(targetRetailer == msg.sender, "Wrong retailer");
 
     items[_upc].ownerID = items[_upc].retailerID;
     items[_upc].itemState = State.Received;
@@ -198,7 +193,7 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
 
   // Define a function 'purchaseItem' that allows the consumer to mark an item 'Purchased'
   // Use the above modifiers to check if the item is received
-  function buyDrug(uint _upc) public received(_upc) onlyConsumer() payable
+  function buyDrug(uint _upc) public  received(_upc) onlyConsumer() payable
     // Call modifier to check if upc has passed previous supply chain stage
     
     // Access Control List enforced by calling Smart Contract / DApp

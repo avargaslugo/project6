@@ -18,42 +18,12 @@ App = {
     consumerID: "0x0000000000000000000000000000000000000000",
 
     init: async function () {
-        App.readForm();
+        //App.readForm();
         /// Setup access to blockchain
         return await App.initWeb3();
+        
     },
 
-    readForm: function () {
-        App.sku = 1, //$("#sku").val();
-        App.upc = 1, //$("#upc").val();
-        App.ownerID = $("#ownerID").val();
-        App.originFarmerID = $("#originFarmerID").val();
-        App.originFarmName = $("#originFarmName").val();
-        App.originFarmInformation = $("#originFarmInformation").val();
-        App.originFarmLatitude = $("#originFarmLatitude").val();
-        App.originFarmLongitude = $("#originFarmLongitude").val();
-        App.productNotes = $("#productNotes").val();
-        App.productPrice = $("#productPrice").val();
-        App.distributorID = $("#distributorID").val();
-        App.retailerID = $("#retailerID").val();
-        App.consumerID = $("#consumerID").val();
-
-        console.log(
-            App.sku,
-            App.upc,
-            App.ownerID, 
-            App.originFarmerID, 
-            App.originFarmName, 
-            App.originFarmInformation, 
-            App.originFarmLatitude, 
-            App.originFarmLongitude, 
-            App.productNotes, 
-            App.productPrice, 
-            App.distributorID, 
-            App.retailerID, 
-            App.consumerID
-        );
-    },
 
     initWeb3: async function () {
         /// Find or Inject Web3 Provider
@@ -71,16 +41,16 @@ App = {
         // Legacy dapp browsers...
         else if (window.web3) {
             App.web3Provider = window.web3.currentProvider;
-            console.log("using port 9545dsfsdf")
         }
         // If no injected web3 instance is detected, fall back to Ganache
         else {
-            App.web3Provider = new Web3.providers.HttpProvider('http://localhost:9545');
-            console.log("using port 9545")
+            App.web3Provider = new Web3.providers.HttpProvider('http://localhost:8545');
+            console.log("using port 8545")
         }
 
         App.getMetaskAccountID();
         console.log("Starting Supply Chain")
+        
         return App.initSupplyChain();
     },
 
@@ -95,6 +65,9 @@ App = {
             }
             console.log('getMetaskID:',res);
             App.metamaskAccountID = res[0];
+            // define default address as default retailer and distributor
+        $("#newDrugRetailerID").val(App.metamaskAccountID)
+        $("#newDrugDistributorID").val(App.metamaskAccountID)
 
         })
     },
@@ -127,6 +100,7 @@ App = {
         event.preventDefault();
 
         App.getMetaskAccountID();
+        
 
         var processId = parseInt($(event.target).data('id'));
         console.log('processId',processId);
@@ -135,19 +109,12 @@ App = {
             case 1:
                 return await App.prduceDrug(event);
                 break;
-            case 2:
-                return await App.processItem(event);
-                break;
-            case 3:
-                return await App.packItem(event);
-                break;
-            case 4:
-                return await App.sellItem(event);
-                break;
             case 5:
+                console.log("pushed buy button")
                 return await App.buyItem(event);
                 break;
             case 6:
+                console.log("pushed ship button")
                 return await App.shipItem(event);
                 break;
             case 7:
@@ -180,10 +147,11 @@ App = {
                 $("#newDrugNotes").val(), //App.productNotes,
                 $("#newDrugRetailerID").val(), //retailer ID
                 $("#newDrugDistributorID").val(), //distributor ID
-                $("#newDrugPrice").val() //price
+                web3.toWei($("#newDrugPrice").val(), "ether") //price
             );
         }).then(function(result) {
             $("#ftc-item").text(result);
+            $("#upcStatus").text("Item UPC:" +$("#newUPC").val() +" has be created")
             console.log('harvestItem',result);
         }).catch(function(err) {
             console.log(err.message);
@@ -203,46 +171,18 @@ App = {
             console.log(err.message);
         });
     },
-    
-    packItem: function (event) {
-        event.preventDefault();
-        var processId = parseInt($(event.target).data('id'));
-
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.packItem(App.upc, {from: App.metamaskAccountID});
-        }).then(function(result) {
-            $("#ftc-item").text(result);
-            console.log('packItem',result);
-        }).catch(function(err) {
-            console.log(err.message);
-        });
-    },
-
-    sellItem: function (event) {
-        event.preventDefault();
-        var processId = parseInt($(event.target).data('id'));
-
-        App.contracts.SupplyChain.deployed().then(function(instance) {
-            const productPrice = web3.toWei(1, "ether");
-            console.log('productPrice',productPrice);
-            return instance.sellItem(App.upc, App.productPrice, {from: App.metamaskAccountID});
-        }).then(function(result) {
-            $("#ftc-item").text(result);
-            console.log('sellItem',result);
-        }).catch(function(err) {
-            console.log(err.message);
-        });
-    },
 
     buyItem: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
-
+        
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            const walletValue = web3.toWei(3, "ether");
-            return instance.buyItem(App.upc, {from: App.metamaskAccountID, value: walletValue});
+
+            const walletValue = web3.toWei($("#messageValue").val(), "ether");
+            return instance.payForDrug($("#upcToProcess").val(), {from: App.metamaskAccountID, value: walletValue});
         }).then(function(result) {
             $("#ftc-item").text(result);
+            $("#upcStatus").text("Item with UPC: " + $("#upcToProcess").val() + " has been paid by retailer; shipment can start as soon as Distributor starts the shipment process");
             console.log('buyItem',result);
         }).catch(function(err) {
             console.log(err.message);
@@ -254,9 +194,10 @@ App = {
         var processId = parseInt($(event.target).data('id'));
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.shipItem(App.upc, {from: App.metamaskAccountID});
+            return instance.shipItem($("#upcToProcess").val(), {from: App.metamaskAccountID});
         }).then(function(result) {
             $("#ftc-item").text(result);
+            $("#upcStatus").text("Item with UPC: " + $("#upcToProcess").val() + " is being shipped");
             console.log('shipItem',result);
         }).catch(function(err) {
             console.log(err.message);
@@ -268,8 +209,9 @@ App = {
         var processId = parseInt($(event.target).data('id'));
 
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.receiveItem(App.upc, {from: App.metamaskAccountID});
+            return instance.receiveItem($("#upcToProcess").val(), {from: App.metamaskAccountID});
         }).then(function(result) {
+            $("#upcStatus").text("Item with UPC: " + $("#upcToProcess").val() + " has been received by retailer");
             $("#ftc-item").text(result);
             console.log('receiveItem',result);
         }).catch(function(err) {
@@ -280,10 +222,11 @@ App = {
     purchaseItem: function (event) {
         event.preventDefault();
         var processId = parseInt($(event.target).data('id'));
-
+        const walletValue = web3.toWei($("#messageValue").val(), "ether");
         App.contracts.SupplyChain.deployed().then(function(instance) {
-            return instance.purchaseItem(App.upc, {from: App.metamaskAccountID});
+            return instance.buyDrug($("#upcToProcess").val(), {from: App.metamaskAccountID, value: walletValue});
         }).then(function(result) {
+            $("#upcStatus").text("Item with UPC: " + $("#upcToProcess").val() + " has been purchased and finalized by a consumer");
             $("#ftc-item").text(result);
             console.log('purchaseItem',result);
         }).catch(function(err) {
@@ -300,7 +243,8 @@ App = {
         App.contracts.SupplyChain.deployed().then(function(instance) {
           return instance.fetchItemBufferOne(App.upc);
         }).then(function(result) {
-          $("#ftc-item").text(result);
+            
+            $("#ftc-item").text(result);
           console.log('fetchItemBufferOne', result);
         }).catch(function(err) {
           console.log(err.message);
@@ -310,15 +254,24 @@ App = {
     fetchItemBufferTwo: function () {
     ///    event.preventDefault();
     ///    var processId = parseInt($(event.target).data('id'));
-                        
+        console.log("fetching data for: " + $("#upc").val())
         App.contracts.SupplyChain.deployed().then(function(instance) {
-          return instance.fetchItemBufferTwo.call(App.upc);
+          return instance.fetchItemBufferTwo.call($("#upc").val());
         }).then(function(result) {
-          $("#ftc-item").text(result);
+            $("#SKU").text(result[0])
+            $("#retailerID").text(result[6])
+            $("#distributorID").text(result[7])
+            $("#itemState").text(result[5])
+            $("#itemPrice").text(web3.fromWei(result[4], "ether"))
+            $("#ftc-item").text(result);
           console.log('fetchItemBufferTwo', result);
         }).catch(function(err) {
           console.log(err.message);
         });
+    },
+
+    fetchMostRelevantData: function() {
+        
     },
 
     fetchEvents: function () {

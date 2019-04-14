@@ -19,23 +19,32 @@
     <div id="ftc-harvest">
         <h2>Product Overview</h2>
         <div class="form-group">
-            SKU
-            <br>
-            <!-- Make sure to have the right initial values -->
-            <input class="input-field" type="number" id="sku" name="sku" value=1><br>
             UPC
             <br>
             <input type="number" id="upc" name="upc" value=1><br>
-            Current Owner ID
+            SKU
             <br>
-            <input type="text" id="ownerID" name="ownerID" value="" size="50"><br>
+            <div id="SKU", name='SKU'></div>
+            Retailer ID
+            <br>
+            <div id="retailerID", name='retailerID'></div>
+            <br>
             Distributor ID
             <br>
-            <input type="text" id="distributorID" name="distributorID" value="" size="50"><br>
+            <div id="distributorID", name='distributorID'></div>
+            <br>
+            Item State
+            <br>
+            <div id="itemState", name='itemState'></div>
+            <br>
+            Drug Price in Ether
+            <br>
+            <div id="itemPrice", name='itemPrice'></div>
+
 
             <div class=button-div>
-                <button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Data 1</button>
-                <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Data 2</button>
+                <!--<button class="btn-fetchOne" id="button" type="button" data-id="9">Fetch Data 1</button>-->
+                <button class="btn-fetchTwo" id="button" type="button" data-id="10">Fetch Drug Details</button>
             </div>
         </div>
         <div class=form-break></div>
@@ -65,45 +74,49 @@
             Drug Price In Ether
             <br>
             <input type="text" id="newDrugPrice" name="newDrugPrice" value="1"><br>
-            Retailer Address
+            Retailer ID
             <br>
             <input type="text" id="newDrugRetailerID" name="newDrugRetailerID" value="144.341490"><br>
-            Distributor Address
+            Distributor ID
             <br>
             <input type="text" id="newDrugDistributorID" name="newDrugDistributorID" value="144.341490"><br>
-
-            <button class="btn-harvest" id="button" type="button" data-id="1">Produce</button>
-            <button class="btn-process" id="button" type="button" data-id="2">Buy Drug (Retailer)</button>
-            <button class="btn-pack" id="button" type="button" data-id="3">Ship Drug</button>
-            <button class="btn-forsale" id="button" type="button" data-id="4">Buy Drug (Consumer)</button>
-        </div>
-        <div class=form-break></div>
-        <h2>Product Details</h2>
-        <div class="form-group">
             Product Notes
             <br>
             <input type="text" id="productNotes" name="productNotes" value="Best beans for Espresso" size="60"><br>
-            Product Price
+           
+
+            <button class="btn-harvest" id="button" type="button" data-id="1">Produce Drug</button>
+        </div>
+        <div class=form-break></div>
+        <h2>Product Processing</h2>
+        Here we process any as drug defined by its UPC through the supply chain. 
+        <div style="width: 100%; overflow: hidden;">
+        <div class="form-group">
+           
+            Item UPC
             <br>
-            <input type="number" id="productPrice" name="productPrice" value=1>ETH<br>
-            Distributor ID
-            <br>
-            <input type="text" id="distributorID" name="distributorID" value="0xf1b1bcd24dad92303dd9fe78be639f7bcf9c238d"
-                size="50">
-            <br>
-            Retailer ID
-            <br>
-            <input type="text" id="retailerID" name="retailerID" value="0x0fb2bfefd526966c87efa19f6693d50971763fc2"
-                size="50"><br>
-            Distributor ID
-            <br>
-            <input type="text" id="consumerID" name="consumerID" value="0x5d777e9127b28fb119e81a6304278a0a21bef1c4"
+            <input type="text" id="upcToProcess" name="upcToProcess" value=""
                 size="50"><br>
             <br>
-            <button class="btn-buy" id="button" type="button" data-id="5">Buy</button>
+            Message Value
+            <br>
+            <input type="text" id="messageValue" name="messageValue" value=""
+                size="50"><br>
+            <br>
+            <button class="btn-buy" id="button" type="button" data-id="5">Buy (Retailer)</button>
             <button class="btn-ship" id="button" type="button" data-id="6">Ship</button>
             <button class="btn-receive" id="button" type="button" data-id="7">Receive</button>
-            <button class="btn-purchase" id="button" type="button" data-id="8">Purchase</button>
+            <button class="btn-purchase" id="button" type="button" data-id="8">Purchase (Consumer)</button>
+        </div>
+        <h2>Item Status</h2>
+        <div class="form-group">
+           
+                
+                <br>
+                <div id="upcStatus", name='upcStatus'>
+                </div>
+                <br>
+            </div>
         </div>
         <div class=form-break></div>
         <hr>
