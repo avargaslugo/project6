@@ -83,14 +83,6 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     require(msg.value >= items[_upc].productPrice, "Not enough funds in the message"); 
     _;
   }
-  
-  // Define a modifier that checks the price and refunds the remaining balance
-  modifier checkValue(uint _upc) {
-    _;
-    uint _price = items[_upc].productPrice;
-    uint amountToReturn = msg.value - _price;
-    items[_upc].consumerID.transfer(amountToReturn);
-  }
 
   // Define a modifier that checks if an item.state of a upc is Produced
   modifier produced(uint _upc) {
@@ -148,6 +140,8 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     address producer = items[_upc].producerID;
     uint drugPrice = items[_upc].productPrice;
 
+    uint returnChange = msg.value - drugPrice;
+    msg.sender.transfer(returnChange);
     producer.transfer(drugPrice);
     items[_upc].itemState = State.PaidFor;
     emit PaidFor(_upc);
@@ -201,6 +195,8 @@ contract SupplyChain is ProducerRole, DistributorRole, RetailerRole, ConsumerRol
     address seller = items[_upc].retailerID;
     uint price = items[_upc].productPrice;
     // Update the appropriate fields - ownerID, consumerID, itemState
+    uint returnChange = msg.value - price;
+    msg.sender.transfer(returnChange);
     seller.transfer(price);
     items[_upc].ownerID = msg.sender;
     items[_upc].itemState = State.Owned;
